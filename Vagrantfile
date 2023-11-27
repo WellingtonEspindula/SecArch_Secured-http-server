@@ -1,8 +1,9 @@
 Vagrant.configure("2") do |config|
     config.vm.box = "ubuntu/jammy64"
-    config.vm.host_name = "ernestometric"
+    config.vm.host_name = "Cysec-WellingtonMachadoDeEspindula"
 
-    config.vm.network "public_network"
+    config.vm.network "public_network",
+      use_dhcp_assigned_default_route: true
 
     config.vm.provider "virtualbox" do |vb|
         vb.memory = "4096"
