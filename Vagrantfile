@@ -2,8 +2,7 @@ Vagrant.configure("2") do |config|
     config.vm.box = "ubuntu/jammy64"
     config.vm.host_name = "Cysec-WellingtonMachadoDeEspindula"
 
-    config.vm.network "public_network",
-      use_dhcp_assigned_default_route: true
+    config.vm.network "public_network", ip: "152.77.84.78"
 
     config.vm.provider "virtualbox" do |vb|
         vb.memory = "4096"
@@ -56,6 +55,14 @@ Vagrant.configure("2") do |config|
     ip a
     curl localhost:80
     SHELL
+
+    # default router
+    config.vm.provision "shell",
+      run: "always",
+      inline: "ip route del default via 10.0.2.2 || true"
+
+    config.vm.network "forwarded_port", guest: 22, host: 2222, host_ip: "0.0.0.0"
+    config.vm.network "forwarded_port", guest: 8080, host: 8080, host_ip: "0.0.0.0"
 
 end
 
