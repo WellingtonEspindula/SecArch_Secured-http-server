@@ -1,5 +1,12 @@
 FROM ubuntu:22.04
 
+
+# Update repo 
+RUN apt-get update
+
+# Install openssl
+RUN apt install -y openssl
+
 # Create new user and group
 RUN useradd -m -s /bin/bash -U user1 -p paV/D3AVahtYk
 RUN echo "user1:$(echo '12345678' | openssl passwd -1 -stdin)" | chpasswd -e
@@ -15,11 +22,8 @@ RUN echo "user3:$(echo '12345678' | openssl passwd -1 -stdin)" | chpasswd -e
 RUN usermod -aG user1 user3
 RUN usermod -aG user2 user3
 
-# Update repo 
-RUN apt-get update
-
 # Ngnix install and config
-RUN apt install -y nginx openssl
+RUN apt install -y nginx
 
 # Create directories for public and protected pages
 RUN mkdir -p /var/www/public /var/www/protected
