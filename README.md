@@ -1,6 +1,6 @@
-# Nginx HTTP Server with Basic Authentication
+# HTTP Server with Basic Authentication
 
-This project sets up an Nginx HTTP server with two main pages: a regular public access page and a protected page/service that requires basic authentication. The protected page allows access only to users with valid credentials.
+As an assignment of Security Architectures, this project aims to setup an HTTP server with two main pages: a regular public access page and a protected page/service that requires basic authentication. The protected page allows access only to users with valid credentials.
 
 ## Table of Contents
 
@@ -24,6 +24,12 @@ Before getting started, make sure you have the following installed:
 
 ### Building the Docker Image
 
+First, you should generate the SSL certificate files using the following script. Make sure you have OpenSSL installed.
+
+```bash
+./generate_certs.sh
+```
+
 ```bash
 docker build -t my-nginx-image .
 ```
@@ -40,7 +46,7 @@ docker run -p 80:80 -p 443:443 --secret nginx_htpasswd my-nginx-image
 - Protected Page (Basic Authentication):
   - URL: [http://localhost/protected](http://localhost/protected)
   - Username: `username`
-  - Password: `password`
+  - Password: `12345678`
 
 ## Configuration Details
 
@@ -58,7 +64,7 @@ The Nginx server is configured with two main pages:
 
 ## Troubleshooting
 
-If you encounter issues accessing the pages or setting up the server, refer to the [Troubleshooting](#troubleshooting) section in this README.
+If you have trouble accessing the pages or setting up the server, please refer to the [Troubleshooting](#troubleshooting) section in this README.
 
 ## Contributing
 
