@@ -34,6 +34,13 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Create the htpasswd file for basic authentication
 RUN echo "user1:$(openssl passwd -apr1 '12345678')" > /etc/nginx/.htpasswd
 
+# Create a directory for certificates
+RUN mkdir -p /etc/nginx/certs
+
+# Copy the self-signed certificates
+COPY certs/server.crt /etc/nginx/certs/
+COPY certs/server.key /etc/nginx/certs/
+
 # Expose ports
 EXPOSE 80
 EXPOSE 443
