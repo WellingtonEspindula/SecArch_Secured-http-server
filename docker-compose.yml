@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  my-nginx-image:
+    build:
+      context: .
+      secrets:
+        - user1_password
+        - user2_password
+        - user3_password
+        - private_user_password
+      args:
+        progress: plain
+    ports:
+      - "80:80"
+      - "443:443"
+
+      
+secrets:
+  user1_password:
+    file: ./.secrets/user1_password.txt
+  user2_password:
+    file: ./.secrets/user2_password.txt
+  user3_password:
+    file: ./.secrets/user3_password.txt
+  private_user_password:
+    file: ./.secrets/private_user_password.txt
+
+             
