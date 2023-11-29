@@ -6,13 +6,8 @@ RUN apt-get update
 # Install openssl
 RUN apt install -y openssl
 
-# # Mounts the secret, hash it and save the new hashed passworrd
-# RUN --mount=type=secret,id=private_user_password,target=/run/secrets/private_user_password echo "user1:$(cat /run/secrets/private_user_password | openssl passwd -6 -stdin)" >&2
-
 # Create new user and group
 RUN useradd -m -s /bin/bash -U user1 -p paV/D3AVahtYk
-# RUN --mount=type=secret,id=user1_password,target=/run/secrets/user1_password \ 
-#     echo "user1:$(cat /run/secrets/user1_password | openssl passwd -6 -stdin)" >&2
 
 RUN --mount=type=secret,id=user1_password,target=/run/secrets/user1_password \ 
     echo "user1:$(cat /run/secrets/user1_password | openssl passwd -6 -stdin)" | chpasswd -e
