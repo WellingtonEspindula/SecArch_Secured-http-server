@@ -1,13 +1,11 @@
 # HTTP Server with Basic Authentication
 
-As an assignment of Security Architectures, this project aims to setup an HTTP server with two main pages: a regular public access page and a protected page/service that requires basic authentication. The protected page allows access only to users with valid credentials.
+As an assignment of Security Architectures, this project aims to set up an HTTP server with two main pages: a regular public access page and a protected page/service that requires basic authentication. The protected page allows access only to users with valid credentials.
 
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
-  - [Building the Docker Image](#building-the-docker-image)
-  - [Running the Docker Container](#running-the-docker-container)
 - [Accessing the Pages](#accessing-the-pages)
 - [Configuration Details](#configuration-details)
 - [Troubleshooting](#troubleshooting)
@@ -22,31 +20,33 @@ Before getting started, make sure you have the following installed:
 
 ## Getting Started
 
-### Building the Docker Image
-
 First, you should generate the SSL certificate files using the following script. Make sure you have OpenSSL installed.
 
 ```bash
 ./generate_certs.sh
 ```
 
-```bash
-docker build -t my-nginx-image .
-```
+To use Docker Compose for running the container and managing secrets:
 
-### Running the Docker Container
+1. Create password files:
+   - `.secrets/user1_password.txt`
+   - `.secrets/user2_password.txt`
+   - `.secrets/user3_password.txt`
+   - `.secrets/private_user_password.txt`
 
-```bash
-docker run -p 80:80 -p 443:443 --secret nginx_htpasswd my-nginx-image
-```
+2. Build and run the Docker Compose services:
+
+   ```bash
+   docker-compose up --build -d
+   ```
 
 ## Accessing the Pages
 
 - Regular Public Access Page: [http://localhost](http://localhost)
 - Protected Page (Basic Authentication):
   - URL: [http://localhost/protected](http://localhost/protected)
-  - Username: `username`
-  - Password: `12345678`
+  - Username: `private_user`
+  - Password: [private_user_password]
 
 ## Configuration Details
 
@@ -59,8 +59,8 @@ The Nginx server is configured with two main pages:
 - **Protected Page with Basic Authentication:**
   - Location: `/var/www/protected`
   - URL: [http://localhost/protected](http://localhost/protected)
-  - Username: `username`
-  - Password: `12345678`
+  - Username: `private_user`
+  - Password: [private_user_password]
 
 ## Troubleshooting
 
@@ -73,4 +73,3 @@ Feel free to contribute to this project by opening issues or submitting pull req
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
