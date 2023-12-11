@@ -50,9 +50,29 @@ RUN mkdir -p /etc/nginx/certs
 COPY certs/server.crt /etc/nginx/certs/
 COPY certs/server.key /etc/nginx/certs/
 
-# Expose ports
-EXPOSE 80
-EXPOSE 443
+RUN apt install -y openssh-server
+RUN mkdir /var/run/sshd
 
-# Start Nginx in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+RUN rm -f /home/user1/.ssh/id*
+COPY .ssh/id_rsa.pub /home/user1/.ssh/authorized_keys
+
+RUN chmod 600 /home/user1/.ssh/authorized_keys && \
+    chown user1:user1 /home/user1/.ssh/authorized_keys
+
+RUN sed -i 's/^#Port.*/Port 22/' /etc/ssh/sshd_config
+RUN sed -i 's/^#AddressFamily.*/AddressFamily any/' /etc/ssh/sshd_config
+RUN sed -i 's/^#ListenAddress 0.0.0.0.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
+RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
+# Add supervisor to run HTTP and SSH in the same container
+RUN apt install -y supervisor
+
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Expose ports
+EXPOSE 22 80 443
+
+# Start Nginx and SSH in the foreground
+CMD ["/usr/bin/supervisord","-c", "/etc/supervisor/conf.d/supervisord.conf"]
