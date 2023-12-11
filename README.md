@@ -37,7 +37,7 @@ To use Docker Compose for running the container and managing secrets:
 2. Build and run the Docker Compose services:
 
    ```bash
-   docker-compose up --build -d
+   docker compose up --build -d
    ```
 
 ## Accessing the Pages
