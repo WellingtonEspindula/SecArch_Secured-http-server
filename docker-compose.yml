@@ -15,7 +15,7 @@ services:
       - "80:80"
       - "443:443"
       - "2222:22"
-    read_only: true
+    # read_only: true
     deploy:
       resources:
         limits:
