@@ -70,7 +70,6 @@ RUN apt install -y supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN apt update \
-    && apt upgrade -y linux-image-generic \
     && apt -y upgrade \
     && apt purge -y --auto-remove \
     && apt clean
