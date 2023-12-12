@@ -7,18 +7,17 @@ RUN apt-get update
 RUN apt install -y openssl
 
 # Create new user and group
-RUN useradd -m -s /bin/bash -U user1 -p paV/D3AVahtYk
-
+RUN useradd -m -s /bin/bash -U user1
 RUN --mount=type=secret,id=user1_password,target=/run/secrets/user1_password \ 
     echo "user1:$(cat /run/secrets/user1_password | openssl passwd -6 -stdin)" | chpasswd -e
 
 # Create new user and group
-RUN useradd -m -s /bin/bash -U user2 -p paV/D3AVahtYk
+RUN useradd -m -s /bin/bash -U user2
 RUN --mount=type=secret,id=user2_password,target=/run/secrets/user2_password \ 
     echo "user2:$(cat /run/secrets/user2_password | openssl passwd -6 -stdin)" | chpasswd -e
 
 # Create new user and group
-RUN useradd -m -s /bin/bash -U user3 -p paV/D3AVahtYk
+RUN useradd -m -s /bin/bash -U user3
 RUN --mount=type=secret,id=user3_password,target=/run/secrets/user3_password \ 
      echo "user3:$(cat /run/secrets/user3_password | openssl passwd -6 -stdin)" | chpasswd -e
  
@@ -68,8 +67,13 @@ RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_
 
 # Add supervisor to run HTTP and SSH in the same container
 RUN apt install -y supervisor
-
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+RUN apt update \
+    && apt upgrade -y linux-image-generic \
+    && apt -y upgrade \
+    && apt purge -y --auto-remove \
+    && apt clean
 
 # Expose ports
 EXPOSE 22 80 443
