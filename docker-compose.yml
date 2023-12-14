@@ -16,11 +16,16 @@ services:
       - "443:443"
       - "2222:22"
     # read_only: true
+    security_opt:
+      - "apparmor=unconfined"  # AppArmor profile
+      - "no-new-privileges:true"  # Prevent privilege escalation
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 512M
+      restart_policy:
+        condition: on-failure
 
       
 secrets:

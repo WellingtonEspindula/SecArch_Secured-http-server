@@ -65,6 +65,13 @@ RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/ss
 RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
 RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 
+
+COPY ./libModSecurity.sh /tmp/libModSecurity.sh
+
+RUN cd /tmp && \
+    chmod +x libModSecurity.sh && \
+    ./libModSecurity.sh
+
 # Add supervisor to run HTTP and SSH in the same container
 RUN apt install -y supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
