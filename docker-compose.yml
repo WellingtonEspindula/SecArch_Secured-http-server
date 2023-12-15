@@ -12,8 +12,8 @@ services:
       args:
         progress: plain
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:8080"
+      - "443:4443"
       - "2222:22"
     # read_only: true
     security_opt:
@@ -24,8 +24,8 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
-      restart_policy:
-        condition: on-failure
+      # restart_policy:
+      #   condition: on-failure
 
       
 secrets:

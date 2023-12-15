@@ -7,7 +7,7 @@ RUN apt-get update
 RUN apt install -y openssl
 
 # Create new user and group
-RUN useradd -m -s /bin/bash -U user1
+RUN useradd -s /bin/bash -U user1
 RUN --mount=type=secret,id=user1_password,target=/run/secrets/user1_password \ 
     echo "user1:$(cat /run/secrets/user1_password | openssl passwd -6 -stdin)" | chpasswd -e
 
@@ -36,7 +36,7 @@ COPY pages/public_page/ /var/www/public
 COPY pages/protected_page/ /var/www/protected
 
 # Copy the Nginx configuration file
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf   
 
 # Create the htpasswd file for basic authentication
 RUN --mount=type=secret,id=private_user_password,target=/run/secrets/private_user_password \ 
@@ -49,32 +49,63 @@ RUN mkdir -p /etc/nginx/certs
 COPY certs/server.crt /etc/nginx/certs/
 COPY certs/server.key /etc/nginx/certs/
 
-RUN apt install -y openssh-server
-RUN mkdir /var/run/sshd
+RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login nginx
+RUN chown -R nginx:nginx /var/log/nginx && \
+    chmod -R 00660 /var/log/nginx && \
+    chmod 770 /var/log/nginx
 
-RUN rm -f /home/user1/.ssh/id*
-COPY .ssh/id_rsa.pub /home/user1/.ssh/authorized_keys
-
-RUN chmod 600 /home/user1/.ssh/authorized_keys && \
-    chown user1:user1 /home/user1/.ssh/authorized_keys
-
-RUN sed -i 's/^#Port.*/Port 22/' /etc/ssh/sshd_config
-RUN sed -i 's/^#AddressFamily.*/AddressFamily any/' /etc/ssh/sshd_config
-RUN sed -i 's/^#ListenAddress 0.0.0.0.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
-RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+RUN chown -R nginx:nginx /var/lib/nginx && \
+    chmod -R 00660 /var/lib/nginx && \
+    chmod 770 /var/lib/nginx 
 
 
-COPY ./libModSecurity.sh /tmp/libModSecurity.sh
+# RUN chown -R nginx:nginx /var/cache/nginx \
+#  && chmod -R g+w /var/cache/nginx \
+#  && touch /var/run/nginx.pid \
+#  && chown -R nginx:nginx /var/run/nginx.pid \
+#  && ln -sf /dev/stdout /var/log/nginx/access.log \
+#  && ln -sf /dev/stderr /var/log/nginx/error.log
 
-RUN cd /tmp && \
-    chmod +x libModSecurity.sh && \
-    ./libModSecurity.sh
+RUN usermod -aG nginx user1
+
+# RUN apt install -y openssh-server
+# RUN mkdir /var/run/sshd
+
+# RUN rm -f /home/user1/.ssh/id*
+# COPY .ssh/id_rsa.pub /home/user1/.ssh/authorized_keys
+
+# RUN chmod 600 /home/user1/.ssh/authorized_keys && \
+#     chown user1:user1 /home/user1/.ssh/authorized_keys
+
+# RUN sed -i 's/^#Port.*/Port 22/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#AddressFamily.*/AddressFamily any/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#ListenAddress 0.0.0.0.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
+
+# COPY ./libModSecurity.sh /tmp/libModSecurity.sh
+
+# RUN cd /tmp && \
+#     chmod +x libModSecurity.sh && \
+#     ./libModSecurity.sh
 
 # Add supervisor to run HTTP and SSH in the same container
 RUN apt install -y supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+RUN touch /supervisor.log && \
+    chown user1:user1 /supervisor.log && \
+    chmod 660 /supervisor.log
+
+RUN touch /supervisord.log && \
+    chown user1:user1 /supervisord.log && \
+    chmod 660 /supervisord.log
+
+RUN touch /supervisord.pid && \
+    chown user1:user1 /supervisord.pid && \
+    chmod 660 /supervisord.pid
 
 RUN apt update \
     && apt -y upgrade \
@@ -82,7 +113,9 @@ RUN apt update \
     && apt clean
 
 # Expose ports
-EXPOSE 22 80 443
+EXPOSE 22 8080 4443
 
 # Start Nginx and SSH in the foreground
 CMD ["/usr/bin/supervisord","-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+USER user1
