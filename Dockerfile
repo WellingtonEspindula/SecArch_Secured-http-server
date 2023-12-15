@@ -58,14 +58,6 @@ RUN chown -R nginx:nginx /var/lib/nginx && \
     chmod -R 00660 /var/lib/nginx && \
     chmod 770 /var/lib/nginx 
 
-
-# RUN chown -R nginx:nginx /var/cache/nginx \
-#  && chmod -R g+w /var/cache/nginx \
-#  && touch /var/run/nginx.pid \
-#  && chown -R nginx:nginx /var/run/nginx.pid \
-#  && ln -sf /dev/stdout /var/log/nginx/access.log \
-#  && ln -sf /dev/stderr /var/log/nginx/error.log
-
 RUN usermod -aG nginx user1
 
 # RUN apt install -y openssh-server
@@ -84,12 +76,12 @@ RUN usermod -aG nginx user1
 # RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
 # RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 
+# Script to install modsec in ubuntu 22.04 (Download dependencies, compile, install and configure eveything)
+COPY ./libModSecurity.sh /tmp/libModSecurity.sh
 
-# COPY ./libModSecurity.sh /tmp/libModSecurity.sh
-
-# RUN cd /tmp && \
-#     chmod +x libModSecurity.sh && \
-#     ./libModSecurity.sh
+RUN cd /tmp && \
+    chmod +x libModSecurity.sh && \
+    ./libModSecurity.sh
 
 # Add supervisor to run HTTP and SSH in the same container
 RUN apt install -y supervisor
