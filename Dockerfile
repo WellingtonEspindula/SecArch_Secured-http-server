@@ -60,22 +60,6 @@ RUN chown -R nginx:nginx /var/lib/nginx && \
 
 RUN usermod -aG nginx user1
 
-# RUN apt install -y openssh-server
-# RUN mkdir /var/run/sshd
-
-# RUN rm -f /home/user1/.ssh/id*
-# COPY .ssh/id_rsa.pub /home/user1/.ssh/authorized_keys
-
-# RUN chmod 600 /home/user1/.ssh/authorized_keys && \
-#     chown user1:user1 /home/user1/.ssh/authorized_keys
-
-# RUN sed -i 's/^#Port.*/Port 22/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#AddressFamily.*/AddressFamily any/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#ListenAddress 0.0.0.0.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
-
 # Script to install modsec in ubuntu 22.04 (Download dependencies, compile, install and configure eveything)
 COPY ./libModSecurity.sh /tmp/libModSecurity.sh
 
@@ -98,6 +82,23 @@ RUN touch /supervisord.log && \
 RUN touch /supervisord.pid && \
     chown user1:user1 /supervisord.pid && \
     chmod 660 /supervisord.pid
+
+# RUN apt install -y openssh-server
+# RUN mkdir /var/run/sshd
+
+# RUN rm -f /home/user1/.ssh/id*
+# COPY .ssh/id_rsa.pub /home/user1/.ssh/authorized_keys
+
+# RUN chmod 600 /home/user1/.ssh/authorized_keys && \
+#     chown user1:user1 /home/user1/.ssh/authorized_keys
+
+# RUN sed -i 's/^#Port.*/Port 22/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#AddressFamily.*/AddressFamily any/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#ListenAddress 0.0.0.0.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+# RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
 
 RUN apt update \
     && apt -y upgrade \
