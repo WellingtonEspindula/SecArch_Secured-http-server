@@ -32,8 +32,8 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
-      # restart_policy:
-      #   condition: on-failure
+      restart_policy:
+        condition: on-failure
 
       
 secrets:
