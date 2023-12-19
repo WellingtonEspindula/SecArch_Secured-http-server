@@ -26,7 +26,7 @@ RUN usermod -aG user1 user3
 RUN usermod -aG user2 user3
 
 # Ngnix install and config
-RUN apt install -y nginx
+RUN apt-get install -y nginx
 
 # Create directories for public and protected pages
 RUN mkdir -p /var/www/public /var/www/protected
@@ -68,7 +68,7 @@ RUN cd /tmp && \
     ./libModSecurity.sh
 
 # Add supervisor to run HTTP and SSH in the same container
-RUN apt install -y supervisor
+RUN apt-get install -y supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN touch /supervisor.log && \
@@ -100,8 +100,8 @@ RUN touch /supervisord.pid && \
 # RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 
 
-RUN apt update \
-    && apt -y upgrade \
+RUN apt-get update \
+    && apt-get -y upgrade \
     && apt purge -y --auto-remove \
     && apt clean
 
