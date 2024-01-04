@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 RUN apt-get update
 
 # Install openssl
-RUN apt install -y openssl
+RUN apt-get install -y openssl
 
 # Create new user and group
 RUN useradd -s /bin/bash -U user1
@@ -83,27 +83,39 @@ RUN touch /supervisord.pid && \
     chown user1:user1 /supervisord.pid && \
     chmod 660 /supervisord.pid
 
-# RUN apt install -y openssh-server
-# RUN mkdir /var/run/sshd
+RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login sshusers
 
-# RUN rm -f /home/user1/.ssh/id*
-# COPY .ssh/id_rsa.pub /home/user1/.ssh/authorized_keys
+RUN apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
 
-# RUN chmod 600 /home/user1/.ssh/authorized_keys && \
-#     chown user1:user1 /home/user1/.ssh/authorized_keys
+RUN rm -f /home/user1/.ssh/id*
+COPY .ssh/id_rsa.pub /home/user1/.ssh/authorized_keys
 
-# RUN sed -i 's/^#Port.*/Port 22/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#AddressFamily.*/AddressFamily any/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#ListenAddress 0.0.0.0.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-# RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+RUN chmod 600 /home/user1/.ssh/authorized_keys && \
+    chown user1:user1 /home/user1/.ssh/authorized_keys
 
+RUN chown -R user1:user1 /etc/ssh && \
+    chown 750 /etc/ssh
 
-RUN apt-get update \
-    && apt-get -y upgrade \
-    && apt purge -y --auto-remove \
-    && apt clean
+RUN chown -R user1:user1 /home/user1/.ssh && \
+    chmod 640 /home/user1/.ssh/authorized_keys
+
+RUN sed -i 's/^#Port.*/Port 22/' /etc/ssh/sshd_config
+RUN sed -i 's/^#AddressFamily.*/AddressFamily any/' /etc/ssh/sshd_config
+RUN sed -i 's/^#ListenAddress 0.0.0.0.*/ListenAddress 0.0.0.0/' /etc/ssh/sshd_config
+RUN sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+RUN sed -i 's/^#AuthorizedKeysFile.*/AuthorizedKeysFile \.ssh\/authorized_keys/' /etc/ssh/sshd_config
+
+RUN apt-get update
+RUN DEBIAN_FRONTEND=noninteractive \
+  apt-get \
+  -o Dpkg::Options::=--force-confold \
+  -o Dpkg::Options::=--force-confdef \
+  -y --allow-downgrades --allow-remove-essential --allow-change-held-packages upgrade
+
+RUN apt purge -y --auto-remove && apt clean
 
 # Expose ports
 EXPOSE 22 8080 4443

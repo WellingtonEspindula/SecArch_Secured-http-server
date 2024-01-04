@@ -24,9 +24,9 @@ services:
       - setuid
       - net_bind_service
     # read_only: true
-    security_opt:
+    # security_opt:
       # - "seccomp=./seccomp-profile.json"
-      - "no-new-privileges:true"  # Prevent privilege escalation
+      # - "no-new-privileges:true" 
     deploy:
       resources:
         limits:
