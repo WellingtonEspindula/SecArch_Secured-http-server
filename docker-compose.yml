@@ -18,6 +18,7 @@ services:
     cap_drop:
       - all
     cap_add:
+      - net_admin
       - chown
       - dac_override
       - setgid

@@ -1,0 +1,22 @@
+# Global settings
+[DEFAULT]
+banaction = iptables-multiport
+bantime  = 10m
+findtime = 10m
+maxretry = 5
+
+# SSH jail
+[sshd]
+enabled  = true
+filter   = sshd
+mode     = aggressive
+logpath  = /var/log/auth.log
+port     = 22
+
+# Nginx jail for HTTP authentication failures
+[nginx-http-auth]
+enabled  = true
+filter   = nginx-http-auth
+logpath  = /var/log/nginx/access.log
+           /var/log/nginx/error.log
+port     = 8080,4443

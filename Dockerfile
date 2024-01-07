@@ -50,10 +50,6 @@ COPY certs/server.crt /etc/nginx/certs/
 COPY certs/server.key /etc/nginx/certs/
 
 RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login nginx
-
-RUN chown -R nginx:nginx /etc/nginx/certs && \
-    chmod -R 750 /etc/nginx/certs
-
 RUN chown -R nginx:nginx /var/log/nginx && \
     chmod -R 00660 /var/log/nginx && \
     chmod 770 /var/log/nginx
@@ -88,6 +84,7 @@ RUN touch /supervisord.pid && \
     chmod 660 /supervisord.pid
 
 RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login sshusers
+RUN usermod -aG sshusers user1
 
 RUN apt-get install -y openssh-server
 RUN mkdir /var/run/sshd
@@ -112,6 +109,34 @@ RUN sed -i 's/^#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
 RUN sed -i 's/^#PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 RUN sed -i 's/^#AuthorizedKeysFile.*/AuthorizedKeysFile \.ssh\/authorized_keys/' /etc/ssh/sshd_config
 
+RUN apt-get install -y fail2ban 
+
+COPY jail.d/jail.local /etc/fail2ban/jail.d/jail.local
+
+RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login fail2ban
+RUN usermod -aG fail2ban user1
+
+# uncomment line to change default fail2ban user to "fail2ban" usergroup
+RUN sed -i 's/^# FAIL2BAN_USER="fail2ban".*/FAIL2BAN_USER="root"/' /etc/default/fail2ban 
+
+RUN mkdir -p /run/fail2ban && \
+    chown -R user1:user1 /run/fail2ban && \
+    chmod -R 760 /run/fail2ban
+
+RUN mkdir -p /var/log/fail2ban && \
+    chown -R user1:user1 /var/log/fail2ban && \
+    chmod -R 760 /var/log/fail2ban
+
+RUN chown -R user1:user1 /var/lib/fail2ban/ && \
+    chmod -R 760 /var/lib/fail2ban/
+
+RUN touch /var/log/fail2ban.log && \
+    chown user1:user1 /var/log/fail2ban.log && \
+    chmod 660 /var/log/fail2ban.log
+
+RUN touch /var/log/auth.log && \
+    chmod 660 /var/log/auth.log
+
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive \
   apt-get \
@@ -121,13 +146,31 @@ RUN DEBIAN_FRONTEND=noninteractive \
 
 RUN apt purge -y --auto-remove && apt clean
 
-# Debugging purposes tools
-# RUN apt-get install curl nmap vim
+RUN DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y iptables
+
+# RUN iptables -A INPUT -i lo -j ACCEPT
+# RUN iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+# RUN iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+# RUN iptables -A INPUT -p tcp -m multiport --dports 80,443 -j ACCEPT
+# RUN iptables -A INPUT -j DROP
+
+# RUN echo "[Definition] \
+# actionstart =" > /etc/fail2ban/action.d/iptables-xt_recent-echo.local
+
+# RUN whoami
+# RUN iptables -N F2B
+# RUN iptables -A INPUT -i eth0 -p tcp --dport 22 -j F2B
+# RUN iptables -A INPUT -i eth0 -p tcp --dport 22 -j ACCEPT
+# RUN iptables -A FORWARD -i eth0 -p tcp --dport 22 -j F2B
+# RUN iptables -A FORWARD -i eth0 -p tcp --dport 22 -j ACCEPT
+# RUN iptables -A F2B -p tcp --dport 22 -m recent --update --seconds 3600 --name fail2ban-ssh -j DROP
+# RUN iptables -A F2B -j RETURN
 
 # Expose ports
 EXPOSE 22 8080 4443
 
-# Start Nginx and SSH in the foreground
-CMD ["/usr/bin/supervisord","-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Restart fail2ban then start Nginx and SSH in the foreground
+CMD service fail2ban restart && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
-USER user1
+# USER user1
