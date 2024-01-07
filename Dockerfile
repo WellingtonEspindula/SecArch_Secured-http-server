@@ -50,6 +50,10 @@ COPY certs/server.crt /etc/nginx/certs/
 COPY certs/server.key /etc/nginx/certs/
 
 RUN adduser --system --no-create-home --shell /bin/false --group --disabled-login nginx
+
+RUN chown -R nginx:nginx /etc/nginx/certs && \
+    chmod -R 750 /etc/nginx/certs
+
 RUN chown -R nginx:nginx /var/log/nginx && \
     chmod -R 00660 /var/log/nginx && \
     chmod 770 /var/log/nginx
@@ -116,6 +120,9 @@ RUN DEBIAN_FRONTEND=noninteractive \
   -y --allow-downgrades --allow-remove-essential --allow-change-held-packages upgrade
 
 RUN apt purge -y --auto-remove && apt clean
+
+# Debugging purposes tools
+# RUN apt-get install curl nmap vim
 
 # Expose ports
 EXPOSE 22 8080 4443
